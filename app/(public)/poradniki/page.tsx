@@ -1,32 +1,27 @@
 import { CategoryPageLayout } from "@/components/category/CategoryPageLayout";
 import type { PostCardData } from "@/components/home/PostCard";
-import { prisma } from "@/lib/prisma";
-import { PostCategory, PostStatus } from "@prisma/client";
+import { DatabaseStatusBanner } from "@/components/public/DatabaseStatusBanner";
+import { getCategoryPostsPage } from "@/lib/posts-queries";
+import { isDatabaseUrlConfigured } from "@/lib/env-db";
+import { PostCategory } from "@prisma/client";
 
 export const revalidate = 3600;
 export const dynamic = "force-dynamic";
 
 export default async function PoradnikiPage() {
   const category = PostCategory.PORADNIK;
-  const [total, rows] = await Promise.all([
-    prisma.post.count({ where: { status: PostStatus.PUBLISHED, category } }),
-    prisma.post.findMany({
-      where: { status: PostStatus.PUBLISHED, category },
-      orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
-      take: 12,
-      select: {
-        title: true,
-        slug: true,
-        excerpt: true,
-        content: true,
-        category: true,
-        featuredImage: true,
-        publishedAt: true,
-      },
-    }),
-  ]);
+  const configured = isDatabaseUrlConfigured();
+  const { rows, total, dbError } = await getCategoryPostsPage(category, 12);
 
   const initialPosts: PostCardData[] = rows.map((r) => ({ ...r, publishedAt: r.publishedAt }));
+  const showBanner = !configured || dbError;
 
-  return <CategoryPageLayout category={category} initialPosts={initialPosts} initialHasMore={total > 12} />;
+  return (
+    <>
+      {showBanner ? (
+        <DatabaseStatusBanner variant={!configured ? "missing_url" : "connection_failed"} />
+      ) : null}
+      <CategoryPageLayout category={category} initialPosts={initialPosts} initialHasMore={total > 12} />
+    </>
+  );
 }

@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PostArticleView } from "@/components/post/PostArticleView";
+import { ArticleDbError } from "@/components/public/ArticleDbError";
 import { categoryToPath } from "@/lib/categories";
 import { buildPostMetadata } from "@/lib/metadata-post";
-import { getPublishedPostBySlug } from "@/lib/posts-queries";
+import { loadPublishedPostBySlug } from "@/lib/posts-queries";
 import { PostCategory } from "@prisma/client";
 
 export const revalidate = 3600;
@@ -11,17 +12,19 @@ export const revalidate = 3600;
 type Props = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await getPublishedPostBySlug(params.slug);
-  if (!post || post.category !== PostCategory.MIEJSCA) {
+  const r = await loadPublishedPostBySlug(params.slug);
+  if (r.status === "db_error") return { title: "Artykuł | PanRybka.pl" };
+  if (r.status !== "ok" || r.post.category !== PostCategory.MIEJSCA) {
     return { title: "Artykuł" };
   }
-  return buildPostMetadata(post);
+  return buildPostMetadata(r.post);
 }
 
 export default async function MiejsceArticlePage({ params }: Props) {
-  const post = await getPublishedPostBySlug(params.slug);
-  if (!post || post.category !== PostCategory.MIEJSCA || categoryToPath(post.category) !== "miejsca") {
+  const r = await loadPublishedPostBySlug(params.slug);
+  if (r.status === "db_error") return <ArticleDbError />;
+  if (r.status !== "ok" || r.post.category !== PostCategory.MIEJSCA || categoryToPath(r.post.category) !== "miejsca") {
     notFound();
   }
-  return <PostArticleView post={post} />;
+  return <PostArticleView post={r.post} />;
 }
