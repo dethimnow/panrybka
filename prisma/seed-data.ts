@@ -1,0 +1,34 @@
+/** Marker dzielący wstęp i zakończenie w artykułach sprzętowych */
+export const SPLIT = "<!--panrybka:end-intro-->";
+
+export const postSprzetContent = `<p>Wybór kołowrotka karpiowego to jedna z najważniejszych decyzji zakupowych w karpiarstwie. Od niego zależy komfort pracy przy zestawie, precyzja zestawów i odporność na długotrwałe obciążenia podczas holu dużych ryb. Na rynku dostępne są setki modeli — od budżetowych konstrukcji po flagowe serie producentów z Japonii i USA. W tym materiale skupiamy się na trzech kategoriach, które sprawdzają się w praktyce: uniwersalnym karpiowaniu na średnim dystansie, lekkiej feederowej/karpiowej hybrydzie oraz solidnej maszynie pod łowiska z silnym prądem i dużymi rybami.</p>
+<p>Kluczowe parametry, na które warto zwrócić uwagę, to przełożenie (wpływa na szybkość zwijania i pracę przy zestawie), pojemność szpuli w relacji do używanego żyłki lub plecionki, jakość hamulca oraz liczba i rozmieszczenie łożysk. Nie bez znaczenia jest też waga całego kołowrotka — przy wielogodzinnym łowieniu różnica 30–50 gramów na zestawie daje się odczuć. Dobrze dobrany drag pozwala bezpiecznie prowadzić hol bez gwałtownych szarpnięć, co przekłada się na mniejszą liczbę spiań i lepszą skuteczność.</p>
+<p>Przetestowaliśmy ponad piętnaście modeli w warunkach polowych: od spokojnych zatok po zalewy z silnym wiatrem i falą. Poniżej prezentujemy trzech finalistów, którzy łączą niezawodność, kulturę pracy i sensowny stosunek ceny do jakości. Po sekcji recenzji znajdziesz <strong>tabelę porównawczą</strong>, która ułatwi szybkie zestawienie specyfikacji i wytypowanie modelu pod własny styl łowienia.</p>
+${SPLIT}
+<h2>Podsumowanie rankingu</h2>
+<p><strong>Shimano Stradic FL 4000</strong> wypadł najlepiej w zestawieniu łączącym płynność pracy, precyzję hamulca i trwałość mechanizmu — to propozycja dla wędkarzy, którzy chcą inwestować w sprzęt na lata i nie chcą kompromisów w jakości.</p>
+<p><strong>Daiwa Freams LT 4000-C</strong> to świetny wybór, jeśli priorytetem jest niska waga i zwinna praca przy zestawie — sprawdzi się przy częstym przerzucaniu zestawów i łowieniu „na lekko”. <strong>Penn Battle III 4000</strong> z kolei to maszyna „robocza”: cięższa od japońskich konkurentów, ale niezwykle odporna na złe warunki i intensywny użytek, szczególnie tam, gdzie sól woda i piasek są codziennością.</p>
+<p>Wybierając kołowrotek, dopasuj go do swojego łowiska i stylu: na spokojne zbiorniki i długie sesje często lepszy będzie lekki LT, na rzeki z nurtem i duże karpie — model z mocniejszym korpusem i wyższym maksymalnym dociskiem hamulca. Pamiętaj o regularnym serwisowaniu szpuli i smarowaniu mechanizmu zgodnie z zaleceniem producenta — wtedy nawet średniopółkowy sprzęt posłuży wiele sezonów.</p>`;
+
+export const postPoradnikContent = `<h2>Czym są boilie?</h2>
+<p>Boilie to kuliste przynęty zazwyczaj wykonane z mąki rybnej, jaj, mączek białkowych i aromatów. Po ugotowaniu lub upieczeniu stają się twarde na zewnątrz, co utrudnia ich zjedzenie przez białe ryby i drobne okazy. Dla karpia są natomiast atrakcyjnym, wysokobiałkowym pokarmem — stąd ich ogromna popularność w karpiarstwie.</p>
+<h2>Dobór rozmiaru i smaku</h2>
+<p>Na start warto mieć kilka rozmiarów (np. 16 i 20 mm) i obserwować reakcje ryb. W wodach silnie zarybionych drobnymi rybami mniejszy diametr może szybko znikać z haczyków; większe kulki filtrują podbierak. Smak i aromat dopasuj do pory roku — w chłodniejszej wodzie często działają ostre, pikantne nuty (np. pieprz, czosnek, przyprawy), latem sprawdzają się słodsze i owocowe profile.</p>
+<h2>Montaż zestawu karpiowego krok po kroku</h2>
+<p>Zacznij od doboru odpowiedniej żyłki lub plecionki i przyponu z haczykiem dopasowanym do wielkości kulki. Hair rig — włos z kulą boilie zawieszoną obok haka — to standard, który warto opanować przed pierwszą wyprawą. Dobierz ciężarek lub system sprężyny zgodnie z dnem i zasięgiem: na muliste dno często lepszy będzie koszyczek z pelletem, na twardym piasku — klasyczny lead clip.</p>
+<h2>Wybór miejsca i pory łowienia</h2>
+<p>Szukaj spadków, rynn, zadrzewionych brzegów i miejsc, gdzie roślinność tworzy naturalne schronienia. Karp jest aktywny w różnych porach, ale przed świtem i po zmroku wiele łowisk „ożywa”. Zachowaj ciszę, unikaj zbędnego biegania po stanowisku i kontroluj napięcie żyłki — często branie jest subtelne.</p>
+<h2>Najczęstsze błędy początkujących</h2>
+<p>Zbyt krótki czas spędzony na jednym stanowisku, przesadna ilość zanęty na start, zły dobór haczyka względem przynęty i zaniedbanie kotwiczenia zestawu to typowe błędy. Ucz się obserwacji wody i notuj trafione zestawienia — karpiarstwo to sport cierpliwości i analizy, a boilie to narzędzie, które przy systematycznym podejściu przynosi wymierne efekty.</p>`;
+
+export const postMiejscaContent = `<h2>Zalew Zegrzyński</h2>
+<p>Jedno z największych sztucznych zbiorników w regionie, znane z karpiowych okazów i rozległych zatok. Na wodzie obowiązuje regulamin zarządcy — sprawdź aktualne strefy spławikowe i spinningowe przed wyjazdem. Dojazd z Warszawy zajmuje około 45–60 minut; parkingi przy popularnych stanowiskach zapełniają się wcześnie w weekendy. Wskazówka: szukaj płytszych półek przy zielonej linii brzegowej o świcie.</p>
+<h2>Jezioro Zdworskie</h2>
+<p>Spokojniejsza alternatywa dla tłumów — czysta woda i zróżnicowane dno sprzyjają karpiowi i leszczowi. Regulamin gminy i zarządu łowiska określa limity i okresy ochronne — zawsze miej przy sobie skan zezwolenia. Parking zwykle przy polnych dojazdach od strony mniejszych miejscowości; warto zabrać wózek na sprzęt.</p>
+<h2>Zbiornik Włocławski (zalew po zaporze)</h2>
+<p>Duża woda, miejscami silny wiatr i fala — wymaga cięższego sprzętu i kotwiczenia namiotów. Karpiarze cenią go za szansę na duże ryby; obowiązują zdalne opłaty i kontrole straży rybackiej. Dojazd zależny od wybranego brzegu; zaplanuj zejście pod zestaw z bezpiecznym podejściem pod urwiska.</p>
+<h2>Jezioro Nidzkie (okolice Rucianego-Nidy)</h2>
+<p>Mazurski klimat, zróżnicowana linia brzegowa i liczne zatoki. W sezonie turystycznym popularne pola namiotowe — rezerwuj wcześniej. Regulamin parków krajobrazowych może ograniczać łowienie w części stref; zweryfikuj mapy ZRSP. Świetne na dłuższe wyjazdy z rodziną — łowisko łączy się z turystyką.</p>
+<h2>Zalew Koronowski (dojazd od strony Mazowsza)</h2>
+<p>Choć bardziej znany z perspektywy północnej Polski, wędkarze z Mazowsza doceniają go przy weekendowych wyjazdach „za miasto”. Duże przestrzenie, miejscami twardy dostęp do wody — karpiarstwo z pontonu lub z płatnych stanowisk z pomostami. Sprawdź lokalne koła i wykup zezwolenie; limity biomasy bywają ściśle egzekwowane.</p>
+<p>Na każdym z wymienionych łowisk przestrzegaj zasad czystości — zabieraj śmieci, unikaj zanęcania niedozwolonymi substancjami i szanuj innych wędkarzy. Dobrze zaplanowany wyjazd pod kątem dojazdu, parkingu i regulaminu to połowa sukcesu przed pierwszym zarzuceniem zestawu.</p>`;

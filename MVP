@@ -1,0 +1,715 @@
+# PANRYBKA.PL — Pełny prompt dla Cursor AI Agent
+ 
+Zbuduj kompletną stronę **panrybka.pl** — nowoczesny blog afiliacyjny o wędkowaniu z CMS panelem. Zaimplementuj WSZYSTKO od razu — żadnych placeholderów, komentarzy "TODO", "tutaj będzie integracja" ani zaślepek. Każda funkcja musi działać w pełni.
+ 
+---
+ 
+## STACK TECHNOLOGICZNY
+ 
+- **Framework:** Next.js 14 (App Router) + TypeScript
+- **Stylowanie:** Tailwind CSS + shadcn/ui
+- **Baza danych:** Supabase (PostgreSQL) + Prisma ORM
+- **Auth:** NextAuth.js (credentials provider)
+- **Rich text editor:** TipTap
+- **Zdjęcia:** Supabase Storage
+- **Hosting:** Vercel-ready
+ 
+---
+ 
+## STRUKTURA PROJEKTU
+ 
+```
+panrybka/
+├── app/
+│   ├── (public)/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx                        # Strona główna
+│   │   ├── sprzet-wedkarski/
+│   │   │   ├── page.tsx
+│   │   │   └── [slug]/page.tsx
+│   │   ├── poradniki/
+│   │   │   ├── page.tsx
+│   │   │   └── [slug]/page.tsx
+│   │   ├── miejsca/
+│   │   │   ├── page.tsx
+│   │   │   └── [slug]/page.tsx
+│   │   └── not-found.tsx
+│   ├── admin/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── posts/
+│   │   │   ├── page.tsx
+│   │   │   ├── new/page.tsx
+│   │   │   └── [id]/edit/page.tsx
+│   │   └── products/
+│   │       ├── page.tsx
+│   │       ├── new/page.tsx
+│   │       └── [id]/edit/page.tsx
+│   ├── api/
+│   │   ├── auth/[...nextauth]/route.ts
+│   │   ├── posts/route.ts
+│   │   ├── posts/[id]/route.ts
+│   │   ├── products/route.ts
+│   │   ├── products/[id]/route.ts
+│   │   └── upload/route.ts
+│   ├── sitemap.ts
+│   └── robots.ts
+├── components/
+│   ├── layout/
+│   │   ├── Navbar.tsx
+│   │   └── Footer.tsx
+│   ├── home/
+│   │   ├── HeroSection.tsx
+│   │   └── PostGrid.tsx
+│   ├── post/
+│   │   ├── PostCard.tsx
+│   │   ├── PostContent.tsx
+│   │   ├── ProductReview.tsx
+│   │   └── ComparisonTable.tsx
+│   ├── admin/
+│   │   ├── PostEditor.tsx
+│   │   ├── SeoPanel.tsx
+│   │   ├── ProductForm.tsx
+│   │   └── SerpPreview.tsx
+│   └── ui/                                # shadcn komponenty
+├── lib/
+│   ├── supabase.ts
+│   ├── prisma.ts
+│   └── utils.ts
+├── prisma/
+│   ├── schema.prisma
+│   └── seed.ts
+├── middleware.ts
+└── .env.local.example
+```
+ 
+---
+ 
+## PRISMA SCHEMA
+ 
+```prisma
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+ 
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+enum PostCategory {
+  SPRZET
+  PORADNIK
+  MIEJSCA
+}
+ 
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+ 
+enum SchemaType {
+  Article
+  HowTo
+  Review
+}
+ 
+model Post {
+  id              String       @id @default(cuid())
+  title           String
+  slug            String       @unique
+  excerpt         String
+  content         String       @db.Text
+  category        PostCategory
+  status          PostStatus   @default(DRAFT)
+  featuredImage   String?
+  author          String       @default("Redakcja PanRybka")
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImage         String?
+  schemaType      SchemaType   @default(Article)
+  focusKeyword    String?
+  publishedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  products        PostProduct[]
+}
+ 
+model Product {
+  id               String       @id @default(cuid())
+  name             String
+  slug             String       @unique
+  brand            String
+  category         String
+  description      String       @db.Text
+  imageUrl         String?
+  affiliateUrl     String
+  affiliateNetwork String       @default("Amazon")
+  price            Float?
+  priceUpdatedAt   DateTime?
+  rating           Float        @default(0)
+  pros             String[]
+  cons             String[]
+  specs            Json
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  posts            PostProduct[]
+}
+ 
+model PostProduct {
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  position  Int      @default(0)
+  isWinner  Boolean  @default(false)
+ 
+  @@id([postId, productId])
+}
+ 
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+}
+```
+ 
+---
+ 
+## DESIGN SYSTEMU — WĘDKARSKI KLIMAT
+ 
+### Paleta kolorów (Tailwind config)
+```js
+// tailwind.config.ts
+colors: {
+  forest: {
+    50:  '#f0f7f0',
+    100: '#d9eeda',
+    200: '#b3ddb5',
+    300: '#7dc480',
+    400: '#4da552',
+    500: '#2d8a33',  // primary green
+    600: '#226e28',
+    700: '#1a571f',
+    800: '#164519',
+    900: '#123816',
+  },
+  water: {
+    50:  '#eff8ff',
+    100: '#daeeff',
+    200: '#b3deff',
+    300: '#66bfff',
+    400: '#1a9cf0',
+    500: '#0080d6',  // primary blue
+    600: '#0065b0',
+    700: '#004f8f',
+    800: '#004276',
+    900: '#003563',
+  },
+  amber: {
+    400: '#f59e0b',
+    500: '#d97706',
+  }
+}
+```
+ 
+### Typografia
+- Font: `Inter` (Google Fonts) — headings + body
+- Nagłówki: bold, lekko tracking-tight
+- Body: 17px, line-height 1.75
+ 
+### Ogólny styl
+- Navbar: ciemny (forest-900), lekko przezroczysty z backdrop-blur po scroll
+- Karty artykułów: białe, delikatny cień, zaokrąglone rogi (rounded-2xl)
+- Akcent: forest-500 (zielony) jako primary, water-500 (niebieski) jako secondary
+- Tło strony: gray-50 z subtelnymi wzorami (opcjonalnie SVG tła z wodą/rybami)
+- Badge kategorii: forest dla Sprzętu, water dla Poradników, amber dla Miejsc
+ 
+---
+ 
+## STRONA GŁÓWNA (/)
+ 
+### Hero Section
+- Pełnoekranowy hero z tłem (gradient forest-900 → forest-700 + subtelna tekstura)
+- Duży nagłówek: "Twój Przewodnik po Wędkarstwie"
+- Podtytuł: "Testy sprzętu, porównania, poradniki i najlepsze łowiska — wszystko w jednym miejscu"
+- CTA button: "Przeglądaj sprzęt" (→ /sprzet-wedkarski) + "Czytaj poradniki" (→ /poradniki)
+- Animacja: fade-in przy załadowaniu
+ 
+### Sekcja postów — siatka 3 kolumny × 4 rzędy = 12 postów
+- Tytuł sekcji: "Najnowsze artykuły"
+- Filtrowanie kategorii: przyciski "Wszystkie | Sprzęt | Poradniki | Miejsca" — client-side filter
+- Siatka kart postów (responsive: 1 kol. mobile, 2 kol. tablet, 3 kol. desktop)
+- Każda karta PostCard zawiera:
+  - Zdjęcie (aspect-video, object-cover, lazy loading)
+  - Badge kategorii (kolorowy pill)
+  - Tytuł (font-semibold, 2 linie max z line-clamp)
+  - Excerpt (3 linie max)
+  - Data + czas czytania (szacowany z content.length / 1000 * 3 minuty)
+  - "Czytaj więcej →" link
+- Przycisk "Pokaż więcej" na dole — ładuje kolejne 12 postów (fetch /api/posts?page=2)
+- Stan ładowania: skeleton cards (animate-pulse)
+- Gdy wszystkie posty załadowane: ukryj przycisk
+ 
+---
+ 
+## NAWIGACJA
+ 
+### Navbar
+```
+Logo "🎣 PanRybka.pl" | Strona Główna | Sprzęt Wędkarski | Poradniki | Miejsca | [search icon]
+```
+- Tło: forest-900/95 z backdrop-blur-md
+- Tekst: white, hover: forest-200
+- Active link: podkreślenie forest-400
+- Mobile: hamburger menu z animowanym slide-down
+- Sticky top z box-shadow po scroll (useScrollPosition hook)
+- Search icon otwiera modal wyszukiwarki (przeszukuje tytuły i treść postów przez API)
+ 
+### Footer
+- Tło: forest-900
+- Kolumny: O nas | Kategorie | Kontakt
+- Copyright + disclaimer afiliacyjny: "Strona zawiera linki afiliacyjne. Jako partner Amazon zarabiamy na kwalifikowanych zakupach."
+- Social media icons (SVG, nie emoji)
+ 
+---
+ 
+## STRONY KATEGORII
+ 
+### /sprzet-wedkarski, /poradniki, /miejsca
+- Hero baner kategorii (gradient + tytuł kategorii + opis)
+- Siatka postów 3×N z "Pokaż więcej" (identyczny mechanizm jak strona główna)
+- Sidebar (desktop): popularne tagi, polecane produkty
+ 
+---
+ 
+## STRONA ARTYKUŁU — SPRZĘT (/sprzet-wedkarski/[slug])
+ 
+Artykuły sprzętowe mają specjalną strukturę:
+ 
+```
+[Hero image pełna szerokość]
+[Breadcrumb: Strona Główna > Sprzęt Wędkarski > Tytuł]
+[Tytuł artykułu — H1, duży]
+[Meta: data | autor | czas czytania | kategoria badge]
+ 
+[TREŚĆ INTRO — rich HTML z bazy, pełna szerokość z max-w-3xl centered]
+ 
+[SEKCJA: Recenzje produktów — jeśli post ma przypisane produkty]
+  H2: "Recenzje produktów"
+  Dla każdego produktu (posortowane wg position):
+    [ProductReview card]
+      - Numer pozycji (1. 2. 3.)
+      - Zdjęcie produktu (lewo) + info (prawo) — grid 2 kolumny
+      - Nazwa, marka, ocena (gwiazdki)
+      - Opis produktu
+      - Plusy (zielone ✓) i Minusy (czerwone ✗) — 2 kolumny
+      - Specyfikacja techniczna — tabela klucz:wartość
+      - Cena + przycisk "Sprawdź cenę na [sieć]" (affiliate link, rel=nofollow sponsored)
+      - Badge "Najlepszy wybór" jeśli isWinner=true
+ 
+[SEKCJA: Tabela porównawcza — ComparisonTable]
+  H2: "Tabela porównawcza"
+  Responsywna tabela HTML:
+    - Sticky pierwsza kolumna (nazwa produktu) na mobile
+    - Nagłówki: Produkt | Ocena | Cena | [dynamiczne kolumny z specs] | Kup
+    - Wiersz zwycięzcy wyróżniony forest-50 border-l-4 border-forest-500
+    - Sortowanie kolumn (klik w nagłówek)
+    - Na mobile: horizontal scroll z shadow wskazującym że można scrollować
+    - Ocena: gwiazdki SVG (nie emoji)
+    - Przycisk "Kup" → affiliate link
+ 
+[TREŚĆ KOŃCOWA — reszta HTML z bazy (wnioski, podsumowanie)]
+ 
+[Sidebar (desktop, sticky):
+  - Spis treści (auto-generowany z H2/H3 artykułu przez JS)
+  - Polecane artykuły (ta sama kategoria)
+]
+```
+ 
+### /poradniki/[slug] i /miejsca/[slug]
+- Standardowy layout: hero → breadcrumb → tytuł → meta → treść HTML → sidebar
+- Brak sekcji produktów
+ 
+---
+ 
+## CMS PANEL (/admin)
+ 
+### Middleware ochrony
+```ts
+// middleware.ts
+export { default } from "next-auth/middleware"
+export const config = { matcher: ["/admin/:path*"] }
+```
+ 
+### Dashboard
+- Karty statystyk: łączna liczba postów, opublikowane, szkice, produkty
+- Tabela ostatnich 10 postów z linkami do edycji
+- Szybkie akcje: "Nowy artykuł", "Nowy produkt"
+ 
+### Edytor artykułów (/admin/posts/new, /admin/posts/[id]/edit)
+ 
+Zakładki: **Treść** | **SEO** | **Produkty**
+ 
+**Zakładka Treść:**
+- Pole: Tytuł (input, required)
+- Pole: Slug (auto-gen z tytułu, edytowalny) — preview URL pod polem
+- Pole: Kategoria (select: Sprzęt Wędkarski / Poradniki / Miejsca)
+- Pole: Excerpt (textarea, licznik max 160 znaków)
+- Pole: Zdjęcie główne — upload do Supabase Storage + preview
+- Rich text editor: TipTap z toolbarem (bold, italic, H2, H3, listy, link, image, quote, tabela)
+- Pole: Autor (input)
+- Pole: Status (toggle: Szkic / Opublikowany)
+- Przycisk: "Zapisz" (PATCH /api/posts/[id]) + "Podgląd" (otwiera /[category]/[slug] w nowej karcie)
+ 
+**Zakładka SEO:**
+- Meta Title — input z licznikiem (0-60 znaków), pasek koloru: zielony ≤60, żółty 61-70, czerwony >70
+- Meta Description — textarea z licznikiem (0-160 znaków), pasek koloru: zielony ≤160, żółty 161-180, czerwony >180
+- Meta Keywords — tagi input (dodaj/usuń)
+- Canonical URL — prefill: `https://panrybka.pl/[category]/[slug]`, edytowalny
+- OG Title — input (placeholder: "Zostaw puste = użyj Meta Title")
+- OG Description — textarea (placeholder: "Zostaw puste = użyj Meta Description")
+- OG Image — input URL
+- Schema Type — select (Article / HowTo / Review)
+- Focus Keyword — input
+ 
+**SERP Preview** (live, pod polami SEO):
+```
+┌─────────────────────────────────────────┐
+│ panrybka.pl › sprzet-wedkarski › [slug] │
+│ [metaTitle — zielony, max 60 znaków]    │
+│ [metaDescription — szary, max 160 zn.]  │
+└─────────────────────────────────────────┘
+```
+Aktualizuje się na żywo podczas pisania.
+ 
+**Zakładka Produkty:**
+- Multi-select produktów z bazy (searchable dropdown)
+- Drag & drop kolejność produktów w artykule
+- Checkbox "Najlepszy wybór" przy każdym produkcie
+- Dodaj/usuń przypisane produkty
+ 
+### Zarządzanie produktami (/admin/products)
+ 
+Lista produktów z filtrowaniem + paginacją.
+ 
+Formularz produktu (/admin/products/new, /admin/products/[id]/edit):
+- Nazwa, Marka, Kategoria (input)
+- Opis (TipTap editor)
+- Zdjęcie (upload Supabase Storage)
+- Link afiliacyjny (URL input)
+- Sieć afiliacyjna (select: Amazon / Ceneo / Sklep wędkarski / Inne)
+- Cena (number input, PLN)
+- Ocena (slider 0-10 z gwiazdkami preview)
+- Plusy — dynamiczna lista (dodaj/usuń pola)
+- Minusy — dynamiczna lista (dodaj/usuń pola)
+- Specyfikacja techniczna — edytor klucz:wartość (dodaj/usuń wiersze), np:
+  - "Przełożenie przekładni" → "5.2:1"
+  - "Pojemność szpuli" → "150m / 0.30mm"
+  - "Waga" → "285g"
+  - "Łożyska" → "10+1"
+ 
+---
+ 
+## SEO — PEŁNA IMPLEMENTACJA
+ 
+### Dynamiczne meta tagi (każda strona)
+```tsx
+// app/(public)/sprzet-wedkarski/[slug]/page.tsx
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const post = await getPostBySlug(params.slug)
+  return {
+    title: post.metaTitle || post.title,
+    description: post.metaDescription || post.excerpt,
+    keywords: post.metaKeywords,
+    alternates: {
+      canonical: post.canonicalUrl || `https://panrybka.pl/sprzet-wedkarski/${post.slug}`,
+    },
+    openGraph: {
+      title: post.ogTitle || post.metaTitle || post.title,
+      description: post.ogDescription || post.metaDescription || post.excerpt,
+      images: [post.ogImage || post.featuredImage || '/og-default.jpg'],
+      type: 'article',
+      publishedTime: post.publishedAt?.toISOString(),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.ogTitle || post.title,
+      description: post.ogDescription || post.excerpt,
+      images: [post.ogImage || post.featuredImage || '/og-default.jpg'],
+    },
+  }
+}
+```
+ 
+### JSON-LD Schema (wstrzyknięty w <head> każdego posta)
+```tsx
+// components/post/SchemaMarkup.tsx
+// Article schema dla postów blogowych
+// HowTo schema dla poradników
+// Product + AggregateRating schema dla każdego produktu w recenzjach
+// ItemList schema dla stron porównań
+// BreadcrumbList na każdej podstronie
+// WebSite + SearchAction na stronie głównej
+```
+ 
+### Sitemap (/sitemap.ts)
+```ts
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = await prisma.post.findMany({ where: { status: 'PUBLISHED' } })
+  return [
+    { url: 'https://panrybka.pl', lastModified: new Date(), priority: 1.0 },
+    { url: 'https://panrybka.pl/sprzet-wedkarski', priority: 0.8 },
+    { url: 'https://panrybka.pl/poradniki', priority: 0.8 },
+    { url: 'https://panrybka.pl/miejsca', priority: 0.8 },
+    ...posts.map(p => ({
+      url: `https://panrybka.pl/${categoryToPath(p.category)}/${p.slug}`,
+      lastModified: p.updatedAt,
+      priority: 0.7,
+    }))
+  ]
+}
+```
+ 
+### robots.ts
+```ts
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: [
+      { userAgent: '*', allow: '/', disallow: ['/admin/', '/api/'] }
+    ],
+    sitemap: 'https://panrybka.pl/sitemap.xml',
+  }
+}
+```
+ 
+### ISR — Incremental Static Regeneration
+```ts
+export const revalidate = 3600 // każda strona odświeża się co 1h
+// Po zapisie w CMS:
+revalidatePath('/sprzet-wedkarski/[slug]')
+revalidatePath('/sprzet-wedkarski')
+revalidatePath('/')
+```
+ 
+---
+ 
+## SUPABASE — KONFIGURACJA
+ 
+### lib/supabase.ts
+```ts
+import { createClient } from '@supabase/supabase-js'
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+```
+ 
+### Upload zdjęć (API route /api/upload)
+```ts
+// Przyjmuje FormData z plikiem
+// Konwertuje do WebP przez sharp (npm install sharp)
+// Uploaduje do Supabase Storage bucket "images"
+// Zwraca publiczny URL
+const { data } = await supabase.storage
+  .from('images')
+  .upload(`posts/${slug}-${Date.now()}.webp`, webpBuffer, {
+    contentType: 'image/webp', upsert: true
+  })
+const { data: urlData } = supabase.storage.from('images').getPublicUrl(data.path)
+return { url: urlData.publicUrl }
+```
+ 
+---
+ 
+## DANE SEED (prisma/seed.ts)
+ 
+Stwórz pełne dane testowe — NIE placeholder text, prawdziwe artykuły o wędkarstwie:
+ 
+### Produkt 1: Shimano Stradic FL 4000
+```
+brand: "Shimano"
+category: "Kołowrotki"
+affiliateUrl: "https://www.amazon.pl/dp/B083XXXX"
+affiliateNetwork: "Amazon"
+price: 649.99
+rating: 9.2
+pros: ["Niezwykle płynna praca", "Świetny stosunek jakości do ceny", "Trwała konstrukcja"]
+cons: ["Nieco cięższy od konkurencji", "Brak zapasowej szpuli"]
+specs: {
+  "Przełożenie": "6.0:1",
+  "Pojemność szpuli": "150m / 0.30mm",
+  "Waga": "265g",
+  "Łożyska": "6+1",
+  "Max drag": "11kg"
+}
+```
+ 
+### Produkt 2: Daiwa Freams LT 4000-C
+```
+brand: "Daiwa"
+category: "Kołowrotki"  
+price: 449.99
+rating: 8.5
+pros: ["Bardzo lekka konstrukcja", "Precyzyjny hamulec", "Dobra cena"]
+cons: ["Mniejsza trwałość przy intensywnym użytkowaniu", "Plastikowa rączka"]
+specs: {
+  "Przełożenie": "5.2:1",
+  "Pojemność szpuli": "170m / 0.30mm",
+  "Waga": "235g",
+  "Łożyska": "5+1",
+  "Max drag": "10kg"
+}
+```
+ 
+### Produkt 3: Penn Battle III 4000
+```
+brand: "Penn"
+category: "Kołowrotki"
+price: 329.99
+rating: 8.0
+pros: ["Bardzo solidna budowa", "Świetna do morza", "Tani w utrzymaniu"]
+cons: ["Cięższa od japońskich modeli", "Mniej płynna praca"]
+specs: {
+  "Przełożenie": "5.6:1",
+  "Pojemność szpuli": "200m / 0.30mm",
+  "Waga": "312g",
+  "Łożyska": "5+1",
+  "Max drag": "13kg"
+}
+```
+ 
+### Post 1 — Sprzęt (z produktami)
+```
+title: "Najlepsze kołowrotki karpiowe 2026 — Ranking i porównanie TOP 3"
+category: SPRZET
+status: PUBLISHED
+excerpt: "Szukasz idealnego kołowrotka karpiowego? Przetestowaliśmy ponad 15 modeli i wybraliśmy trzy absolutnych liderów. Sprawdź nasze rankingi, szczegółowe recenzje i tabelę porównawczą."
+featuredImage: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200"
+focusKeyword: "kołowrotki karpiowe"
+metaTitle: "Najlepsze kołowrotki karpiowe 2026 — Ranking TOP 3 [Testy]"
+metaDescription: "Ranking najlepszych kołowrotków karpiowych 2026. Shimano Stradic, Daiwa Freams i Penn Battle — szczegółowe recenzje, tabela porównawcza i rekomendacje ekspertów."
+ 
+content: (pełny HTML artykułu — intro ~400 słów o tym jak wybierać kołowrotki karpiowe,
+na co zwracać uwagę przy zakupie, jakie parametry są kluczowe — prawdziwy content SEO)
+```
+ 
+### Post 2 — Poradnik
+```
+title: "Jak łowić karpia metodą na boilie — Kompletny poradnik dla początkujących"
+category: PORADNIK
+status: PUBLISHED
+excerpt: "Metoda na boilie to jedna z najpopularniejszych technik karpiowych. W tym poradniku znajdziesz wszystko — od doboru przynęty, przez montaż zestawu, aż po wybór łowiska."
+featuredImage: "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=1200"
+metaTitle: "Łowienie karpia na boilie — Poradnik krok po kroku [2026]"
+metaDescription: "Kompletny poradnik łowienia karpia na boilie. Dobór przynęty, montaż zestawu karpiowego, wybór łowiska — wszystko co musisz wiedzieć jako początkujący karpiarz."
+ 
+content: (pełny HTML poradnika — H2: "Czym są boilie?", H2: "Dobór rozmiaru i smaku",
+H2: "Montaż zestawu karpiowego krok po kroku", H2: "Wybór miejsca i pory łowienia",
+H2: "Najczęstsze błędy początkujących" — prawdziwy content ~800 słów)
+```
+ 
+### Post 3 — Miejsca
+```
+title: "Najlepsze łowiska karpiowe w Mazowieckiem — TOP 5 jezior i zalewów"
+category: MIEJSCA
+status: PUBLISHED  
+excerpt: "Mazowsze kryje wiele świetnych łowisk karpiowych. Zebraliśmy 5 najlepszych miejsc w regionie — z opisem, dojazdem, regulaminem i wskazówkami gdzie szukać karpi."
+featuredImage: "https://images.unsplash.com/photo-1467244216928-48b7ac20b94a?w=1200"
+ 
+content: (pełny HTML artykułu o łowiskach — prawdziwe opisy 5 miejsc w Mazowieckiem,
+np. Zalew Zegrzyński, Jezioro Zdworskie, Zbiornik Włocławski itd.
+Każde miejsce: opis, gatunki ryb, dojazd, parking, regulamin połowów, wskazówki)
+```
+ 
+### Admin user seed
+```
+email: "admin@panrybka.pl"
+password: bcrypt("Admin123!")
+```
+ 
+---
+ 
+## PACKAGE.JSON — wymagane pakiety
+ 
+```json
+{
+  "dependencies": {
+    "next": "14.2.x",
+    "react": "18.x",
+    "typescript": "5.x",
+    "@prisma/client": "5.x",
+    "@supabase/supabase-js": "2.x",
+    "next-auth": "4.x",
+    "bcryptjs": "2.x",
+    "@tiptap/react": "2.x",
+    "@tiptap/starter-kit": "2.x",
+    "@tiptap/extension-image": "2.x",
+    "@tiptap/extension-link": "2.x",
+    "@tiptap/extension-table": "2.x",
+    "@tiptap/extension-table-row": "2.x",
+    "@tiptap/extension-table-cell": "2.x",
+    "@tiptap/extension-table-header": "2.x",
+    "sharp": "0.33.x",
+    "@hello-pangea/dnd": "4.x",
+    "clsx": "2.x",
+    "tailwind-merge": "2.x",
+    "lucide-react": "0.x",
+    "date-fns": "3.x"
+  },
+  "devDependencies": {
+    "prisma": "5.x",
+    "tailwindcss": "3.x",
+    "@types/bcryptjs": "2.x"
+  },
+  "scripts": {
+    "postinstall": "prisma generate"
+  }
+}
+```
+ 
+---
+ 
+## .env.local.example
+ 
+```env
+# Supabase
+DATABASE_URL="postgresql://postgres.[project-ref]:[password]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[project-ref]:[password]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+NEXT_PUBLIC_SUPABASE_URL="https://[project-ref].supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."
+ 
+# NextAuth
+NEXTAUTH_SECRET="wygeneruj: openssl rand -base64 32"
+NEXTAUTH_URL="http://localhost:3000"
+ 
+# Site
+NEXT_PUBLIC_SITE_URL="https://panrybka.pl"
+```
+ 
+---
+ 
+## KOLEJNOŚĆ IMPLEMENTACJI
+ 
+1. `prisma/schema.prisma` + migracja + seed
+2. `lib/supabase.ts` + `lib/prisma.ts`
+3. Konfiguracja NextAuth (`/api/auth/[...nextauth]`)
+4. Middleware ochrony /admin
+5. API routes (CRUD posts, products, upload)
+6. Layout publiczny (Navbar, Footer)
+7. Strona główna — Hero + PostGrid z "Pokaż więcej"
+8. Strony kategorii
+9. Strona artykułu z ProductReview + ComparisonTable
+10. CMS — edytor postów z zakładką SEO (SERP preview)
+11. CMS — zarządzanie produktami
+12. SEO: generateMetadata, JSON-LD, sitemap, robots
+13. ISR + revalidatePath po zapisie
+ 
+---

@@ -1,0 +1,11 @@
+## WAŻNE ZASADY
+ 
+- Każda funkcja musi być w pełni zaimplementowana — zero placeholderów
+- Linki afiliacyjne zawsze z `rel="nofollow sponsored noopener" target="_blank"`
+- Zdjęcia zawsze przez `next/image` z `loading="lazy"` i właściwymi rozmiarami
+- Wszystkie formularze z walidacją (react-hook-form lub natywna walidacja HTML5)
+- Error handling na każdym API route (try/catch, odpowiednie kody HTTP)
+- Loading states wszędzie tam gdzie jest async data fetching
+- Mobile-first — każdy komponent musi być responsywny
+- Dark mode NIE jest wymagany (pomijamy dla uproszczenia)
+- TypeScript strict mode — brak `any`

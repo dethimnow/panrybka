@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fafafa;
+  --foreground: #171717;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.article-body {
+  @apply prose prose-lg max-w-none text-gray-800 prose-headings:font-bold prose-headings:tracking-tight prose-a:text-water-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl;
+}
+
+.article-body h2 {
+  @apply mt-10 text-2xl text-forest-900;
+}
+
+.article-body h3 {
+  @apply mt-6 text-xl text-forest-800;
+}
+
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-animate-in {
+  animation: hero-fade-in 0.8s ease-out both;
+}
